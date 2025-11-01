@@ -1,0 +1,165 @@
+/*
+File: prisma/schema.prisma
+*/
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma" // Good practice for Neon
+}
+
+// ------------------------------------------
+// ENUMS (For roles and status)
+// ------------------------------------------
+
+enum Role {
+  STUDENT
+  CLUB_MANAGER
+  DSW_OFFICIAL
+}
+
+enum EventStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ------------------------------------------
+// MODELS
+// ------------------------------------------
+
+// User model for auth and roles
+model User {
+  id        String @id @default(cuid()) // Unique ID
+  clerkId   String @unique // The ID from Clerk auth
+  email     String @unique
+  firstName String?
+  lastName  String?
+  role      Role   @default(STUDENT) // Default role is STUDENT
+  imageUrl  String?
+
+  // Relations
+  clubManaged     Club?          @relation("ClubManager")
+  createdEvents   Event[]        @relation("CreatedBy")
+  approvals       EventApproval[] @relation("ReviewedBy")
+  registrations   Registration[] @relation("RegisteredStudent")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Club model
+model Club {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  // Relation to the Club Manager (a User)
+  managerId String @unique
+  manager   User   @relation("ClubManager", fields: [managerId], references: [clerkId])
+
+  // Relation to events created by this club
+  events Event[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Event model
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  date        DateTime
+  venue       String
+  status      EventStatus @default(DRAFT)
+  
+  // --- NOTESHEET FIELDS (UPDATED) ---
+  objectives    String
+  beneficiaries String    // <-- ADDED
+  schedule      String    // <-- ADDED
+  requirements  String?   // <-- ADDED
+  creativeUrl   String?   // <-- RENAMED (was creativesUrl)
+
+  // --- RELATIONS ---
+  creatorId String
+  creator   User   @relation("CreatedBy", fields: [creatorId], references: [clerkId])
+
+  clubId String
+  club   Club   @relation(fields: [clubId], references: [id])
+
+  notesheet      Notesheet?     // An event might have one notesheet
+  approval       EventApproval? // An event might have one approval record
+  registrations  Registration[] // An event can have many registrations
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Notesheet model (for AI generation)
+model Notesheet {
+  id               String   @id @default(cuid())
+  
+  // This is the AI-generated text
+  generatedText    String
+  
+  // This is the raw form data that was used to generate it
+  formDataJson     Json
+  
+  // Relation back to the event
+  eventId          String   @unique
+  event            Event    @relation(fields: [eventId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Event Approval model
+model EventApproval {
+  id        String         @id @default(cuid())
+  status    ApprovalStatus @default(PENDING)
+  comments  String?
+  
+  // Relation to the event being approved
+  eventId   String         @unique
+  event     Event          @relation(fields: [eventId], references: [id])
+  
+  // Relation to the DSW official who reviewed it
+  reviewerId String? // Optional, in case it's pending
+  reviewer   User?   @relation("ReviewedBy", fields: [reviewerId], references: [clerkId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Registration model
+model Registration {
+  id        String   @id @default(cuid())
+  qrCode    String   @unique // The QR code data
+  checkedIn Boolean  @default(false)
+  
+  // Relation to the student
+  studentId String
+  student   User   @relation("RegisteredStudent", fields: [studentId], references: [clerkId])
+  
+  // Relation to the event
+  eventId   String
+  event     Event  @relation(fields: [eventId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([studentId, eventId]) // A student can only register for an event once
+}
