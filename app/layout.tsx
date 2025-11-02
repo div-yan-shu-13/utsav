@@ -29,7 +29,7 @@ export default function RootLayout({
     >
       <html
         lang="en"
-        className={`dark ${GeistSans.variable} ${GeistMono.variable}`}
+        className={`${GeistSans.variable} ${GeistMono.variable}`}
         suppressHydrationWarning
       >
         <body>
