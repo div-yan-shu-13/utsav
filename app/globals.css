@@ -6,6 +6,8 @@ File: src/app/globals.css
 
 @import "tw-animate-css";
 
+@plugin "@tailwindcss/typography";
+
 /*
 ---break---
 */

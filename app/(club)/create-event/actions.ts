@@ -28,6 +28,9 @@ function buildNotesheetPrompt(data: EventFormValues): string {
     Please generate an official notesheet for a university event.
     Use the following details and format it clearly with headings.
 
+    IMPORTANT: Do NOT use Markdown tables, horizontal rules (---), or any placeholder signature lines (like '||---||' or '____').
+    Just use clean, readable text.
+
     EVENT DETAILS:
     - Event Title: ${data.title}
     - Description: ${data.description}
