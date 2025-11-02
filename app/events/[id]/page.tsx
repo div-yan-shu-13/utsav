@@ -1,16 +1,15 @@
 /*
 File: src/app/events/[id]/page.tsx
-(This file has both fixes applied)
 */
 
 import { db } from "@/lib/db";
 import { format } from "date-fns";
 import { notFound } from "next/navigation";
-import { UserButton } from "@clerk/nextjs"; // This is a client component, this import is correct
-import { auth } from "@clerk/nextjs/server"; // This is a server function, this import is correct
+import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
-// 1. THE FIX: Use a relative import
 import RegisterButton from "./components/RegisterButton";
+import Navbar from "@/components/Navbar"; // 1. Import the new Navbar
+import Footer from "@/components/Footer"; // <-- 1. IMPORT THE FOOTER
 
 // This function fetches the event data
 async function getEventDetails(eventId: string) {
@@ -22,7 +21,7 @@ async function getEventDetails(eventId: string) {
     include: {
       club: true,
     },
-    take: 1, // Using findMany/take:1 to avoid cache issues
+    take: 1,
   });
 
   const event = events[0];
@@ -35,7 +34,6 @@ async function getEventDetails(eventId: string) {
 
 // This function checks registration status
 async function getRegistrationStatus(eventId: string) {
-  // 2. THE FIX: Add 'await' to the auth() call
   const { userId } = await auth();
   if (!userId) {
     return false;
@@ -61,20 +59,12 @@ export default async function EventDetailPage({
   const isAlreadyRegistered = await getRegistrationStatus(params.id);
 
   return (
-    <div className="min-h-screen">
-      {/* Simple header */}
-      <header className="flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
-        <Link
-          href="/events"
-          className="text-lg font-bold tracking-tight text-foreground"
-        >
-          Utsav Events
-        </Link>
-        <UserButton />
-      </header>
+    <div className="flex min-h-screen flex-col">
+      {/* 2. Replace the old <header> with <Navbar /> */}
+      <Navbar />
 
-      {/* Page Content */}
-      <main className="mx-auto max-w-3xl p-4 py-8 md:p-8">
+      {/* 3. Add 'pt-16' to offset the fixed navbar */}
+      <main className="mx-auto max-w-3xl flex-1 p-4 py-8 pt-16 md:p-8 md:pt-24">
         <h1 className="mb-4 text-4xl font-bold tracking-tight">
           {event.title}
         </h1>
@@ -102,6 +92,9 @@ export default async function EventDetailPage({
           />
         </div>
       </main>
+
+      {/* 4. ADD THE FOOTER */}
+      <Footer />
     </div>
   );
 }
