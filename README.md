@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Utsav - MUJ Event Management Platform
 
-## Getting Started
+Utsav is a modern, end-to-end event management platform designed to digitize and streamline the entire workflow for club events at Manipal University Jaipur (MUJ). It handles everything from event creation and AI-powered notesheet generation to DSW approval, student registration, and real-time QR code check-in.
 
-First, run the development server:
+This project is built with a modern, type-safe stack including Next.js 16, Prisma, and Clerk, with AI features powered by Groq.
+
+## ✨ Core Features
+
+The platform is built around a core workflow for three distinct user roles:
+
+### 1. For Club Managers
+
+- **AI-Powered Notesheet Generation:** Create events using a simple form, and our system uses Groq's AI to instantly generate an official, formatted notesheet draft, matching MUJ's standards.
+- **Event Management:** View the status of all submitted events (Pending, Approved, Rejected) in a clean dashboard.
+- **QR Code Check-in:** Scan student QR code "tickets" at the event venue using a phone or laptop camera for real-time attendance tracking.
+
+### 2. For DSW Officials
+
+- **Approval Dashboard:** View a list of all events pending approval.
+- **Review & Act:** Review the AI-generated notesheet and event details on a dedicated page.
+- **Approve/Reject:** Approve or reject events with a single click. Rejection requires comments for feedback.
+
+### 3. For Students
+
+- **Event Discovery:** Browse a public page of all approved, upcoming events.
+- **Simple Registration:** Register for any event with a single click.
+- **QR Code Tickets:** View all registered events in a personal dashboard, with a unique QR code "ticket" for each one.
+
+## 🚀 Tech Stack
+
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router, Server Actions)
+- **Frontend:** [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS](https://tailwindcss.com/)
+- **UI:** [shadcn/ui](https://ui.shadcn.com/) (using `oklch` for MUJ branding)
+- **Database:** [Neon DB](https://neon.tech/) (Serverless PostgreSQL)
+- **ORM:** [Prisma](https://www.prisma.io/)
+- **Authentication:** [Clerk](https://clerk.com/) (handles auth & role-based routing)
+- **AI:** [Groq Cloud](https://groq.com/) (for notesheet generation)
+- **QR Codes:** `html5-qrcode` (scanning) & `react-qr-code` (generation)
+- **Form Management:** `react-hook-form` & `zod`
+
+## ⚙️ Getting Started
+
+### 1. Prerequisites
+
+- Node.js (v18 or later)
+- `npm` or `yarn`
+- A free [Neon](https://neon.tech/) account
+- A free [Clerk](https://clerk.com/) account
+- A free [Groq Cloud](https://console.groq.com/) account
+
+### 2. Environment Setup
+
+Clone the repository and create a `.env` file in the root directory. Add the following keys:
+
+```.env
+# 1. NEON DATABASE URL
+# Get this from your Neon project dashboard
+DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
+
+# 2. CLERK KEYS
+# Get these from your Clerk application dashboard
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+
+# Clerk redirect URLs
+NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
+NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL="/dashboard"
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL="/dashboard"
+
+# 3. CLERK WEBHOOK
+# Get this from the "Webhooks" section in your Clerk dashboard
+CLERK_WEBHOOK_SECRET=whsec_...
+
+# 4. GROQ AI KEY
+# Get this from the "API Keys" section in your Groq Cloud dashboard
+GROQ_API_KEY=gsk_...
+```
+
+### 3\. Install Dependencies
+
+```bash
+npm install
+```
+
+### 4\. Push Database Schema
+
+This will sync your `prisma/schema.prisma` file with your Neon database.
+
+```bash
+npx prisma migrate dev
+```
+
+### 5\. Run the App
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Your app is now running on `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔧 Post-Setup: User Roles
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This app will not work correctly until you assign user roles.
 
-## Learn More
+1.  **Sign up** for a new account. This user will be a `STUDENT` by default.
+2.  Run `npx prisma studio` to open the database editor.
+3.  Go to the `User` model and find your new user.
+4.  To test DSW features, change their `role` from `STUDENT` to `DSW_OFFICIAL`.
+5.  To test Club features, change their `role` to `CLUB_MANAGER`.
+    - **Important:** You must also go to the `Club` model and create a new club. Set the `managerId` of that club to the `clerkId` of your club manager user.
 
-To learn more about Next.js, take a look at the following resources:
+<!-- end list -->
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
