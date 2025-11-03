@@ -1,18 +1,22 @@
-/*
-File: src/app/layout.tsx
-(This is the complete, correct file)
-*/
-
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+// 1. Import the new 'Righteous' font
+import { Righteous } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { dark as clerkDarkTheme } from "@clerk/themes";
-import { Toaster } from "@/components/ui/sonner"; // <-- 1. IMPORT FROM 'sonner'
+import { dark as clerkLightTheme } from "@clerk/themes";
+import { Toaster } from "@/components/ui/sonner";
+
+// 2. Configure the new font
+const righteous = Righteous({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-righteous", // Create a CSS variable
+});
 
 export const metadata: Metadata = {
-  title: "Utsav MVP - MUJ Events",
+  title: "Utsav - MUJ Events",
   description: "Streamlining club events, approvals, and registration at MUJ.",
 };
 
@@ -24,18 +28,18 @@ export default function RootLayout({
   return (
     <ClerkProvider
       appearance={{
-        baseTheme: clerkDarkTheme,
+        baseTheme: clerkLightTheme,
       }}
     >
       <html
         lang="en"
-        className={`${GeistSans.variable} ${GeistMono.variable}`}
+        // 3. Add the font variable to the <html> tag
+        className={`${GeistSans.variable} ${GeistMono.variable} ${righteous.variable}`}
         suppressHydrationWarning
       >
         <body>
           {children}
-          {/* 2. ADD THE NEW TOASTER (it's 'richColors' and 'theme') */}
-          <Toaster richColors theme="dark" />
+          <Toaster richColors theme="light" />
         </body>
       </html>
     </ClerkProvider>

@@ -95,12 +95,12 @@ export default async function Home() {
             className="absolute inset-0 bg-[url('/img/muj-campus.jpg')] bg-cover bg-center"
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
-          <div className="relative z-10 container px-4 text-center text-white drop-shadow-md">
+          <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
+          <div className="relative z-10 container px-4 text-center text-white drop-shadow-lg">
             <h1 className="text-6xl font-bold tracking-tight md:text-8xl">
               <span className="text-primary">U</span>tsav
             </h1>
-            <p className="mt-4 text-lg text-gray-200 md:text-xl">
+            <p className="mt-4 text-lg text-gray-200 md:text-xl drop-shadow-lg">
               MUJ's One Stop Event Management Platform
             </p>
             <div className="mt-8 flex justify-center gap-4">

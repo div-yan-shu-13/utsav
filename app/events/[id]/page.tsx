@@ -55,8 +55,9 @@ export default async function EventDetailPage({
 }: {
   params: { id: string };
 }) {
-  const event = await getEventDetails(params.id);
-  const isAlreadyRegistered = await getRegistrationStatus(params.id);
+  const param = await Promise.resolve(params);
+  const event = await getEventDetails(param.id);
+  const isAlreadyRegistered = await getRegistrationStatus(param.id);
 
   return (
     <div className="flex min-h-screen flex-col">

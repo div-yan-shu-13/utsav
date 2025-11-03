@@ -1,48 +1,44 @@
-/*
-File: src/app/(dsw)/layout.tsx
-*/
-
 import { getCurrentUser } from "@/lib/user";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import Sidebar, { NavLink } from "@/components/Sidebar";
+import { LayoutDashboard, CheckSquare } from "lucide-react";
+
+// 1. Define the links for the DSW sidebar
+const dswLinks: NavLink[] = [
+  {
+    href: "/dashboard/dsw",
+    label: "Dashboard",
+    icon: <LayoutDashboard className="h-4 w-4" />,
+  },
+  {
+    href: "/approvals",
+    label: "Pending Approvals",
+    icon: <CheckSquare className="h-4 w-4" />,
+  },
+];
 
 export default async function DswLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // 1. Get the current user
+  // 2. Protect this layout
   const user = await getCurrentUser();
-
-  // 2. Protect this entire layout
   if (user?.role !== "DSW_OFFICIAL") {
-    // If not a DSW official, kick them back to their own dashboard
     redirect("/dashboard");
   }
 
-  // 3. This is the shared UI for all DSW pages
   return (
-    <div className="min-h-screen">
-      <header className="flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
-        <nav className="flex items-center gap-6 text-sm font-medium">
-          <Link
-            href="/dashboard/dsw"
-            className="font-bold tracking-tight text-foreground transition-colors hover:text-foreground/80"
-          >
-            Utsav / DSW
-          </Link>
-          <Link
-            href="/approvals"
-            className="text-foreground/70 transition-colors hover:text-foreground"
-          >
-            Pending Approvals
-          </Link>
-        </nav>
-        <UserButton />
-      </header>
+    // 3. --- THIS IS THE SCROLLING FIX ---
+    // We lock the layout to the screen height
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar links={dswLinks} roleName="Utsav / DSW" />
 
-      <main className="p-4 md:p-8">{children}</main>
+      {/* 4. This 'div' becomes the only scrollable area */}
+      <div className="flex-1 overflow-auto">
+        <main className="p-4 pt-8 md:p-8">{children}</main>
+      </div>
     </div>
   );
 }

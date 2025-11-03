@@ -1,7 +1,3 @@
-/*
-File: src/app/(club)/create-event/components/EventForm.tsx
-*/
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -36,35 +32,39 @@ import { cn } from "@/lib/utils";
 export default function EventForm() {
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
+    // 1. --- THIS IS THE FIX ---
+    // We provide default values for all fields to prevent
+    // the "uncontrolled to controlled" error.
     defaultValues: {
-      /* ... (same as before) ... */
+      title: "",
+      description: "",
+      venue: "",
+      objectives: "",
+      beneficiaries: "",
+      schedule: "",
+      requirements: "",
+      creativeUrl: "",
+      // date is optional in the form, so we can start it as undefined
+      date: undefined,
     },
   });
 
   const { isSubmitting } = form.formState;
 
-  // --- THIS IS THE UPDATED SUBMIT HANDLER ---
   async function onSubmit(values: EventFormValues) {
     try {
       await createEvent(values);
-      // We don't even need a success toast, the redirect is enough
-      // toast.success("Event created!");
+      toast.success("Event created and notesheet generated!");
     } catch (error) {
-      // --- THIS IS THE FIX ---
-      // Check if the error is the special NEXT_REDIRECT error
       if ((error as Error)?.message?.includes("NEXT_REDIRECT")) {
-        // If it is, it's a successful redirect, so just stop.
         return;
       }
-
-      // Otherwise, it's a REAL error
       toast.error("Oh no! Something went wrong.", {
         description: (error as Error).message || "Failed to create event.",
       });
     }
   }
 
-  // The rest of the form is identical
   return (
     <Form {...form}>
       <form
@@ -250,7 +250,7 @@ export default function EventForm() {
             <FormItem>
               <FormLabel>Creative/Poster URL (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="https://..." />
+                <Input placeholder="https://..." {...field} />
               </FormControl>
               <FormDescription>
                 Link to your event poster (e.g., Google Drive, Imgur).

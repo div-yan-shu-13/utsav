@@ -1,55 +1,45 @@
-/*
-File: src/app/(student)/layout.tsx
-*/
-
 import { getCurrentUser } from "@/lib/user";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
+import Sidebar, { NavLink } from "@/components/Sidebar";
+import { CalendarCheck, Search } from "lucide-react";
+
+// 1. Define the navigation links for a Student
+const studentLinks: NavLink[] = [
+  {
+    href: "/dashboard/student",
+    label: "My Registrations",
+    icon: <CalendarCheck className="h-4 w-4" />,
+  },
+  {
+    href: "/events",
+    label: "Browse Events",
+    icon: <Search className="h-4 w-4" />,
+  },
+];
 
 export default async function StudentLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // 1. Get the current user
+  // 2. Protect the route
   const user = await getCurrentUser();
-
-  // 2. Protect this entire layout
-  // We allow all roles here, but redirect to their main dashboard
-  // if they aren't a student.
   if (user?.role !== "STUDENT") {
     redirect("/dashboard");
   }
 
-  // 3. This is the shared UI for all student pages
+  // 3. --- THIS IS THE FIX ---
+  // Add 'h-screen overflow-hidden' to lock the layout to the viewport
   return (
-    <div className="min-h-screen">
-      <header className="flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
-        <nav className="flex items-center gap-6 text-sm font-medium">
-          <Link
-            href="/dashboard/student"
-            className="font-bold tracking-tight text-foreground transition-colors hover:text-foreground/80"
-          >
-            Utsav / Student
-          </Link>
-          <Link
-            href="/dashboard/student"
-            className="text-foreground/70 transition-colors hover:text-foreground"
-          >
-            My Registrations
-          </Link>
-          <Link
-            href="/events"
-            className="text-foreground/70 transition-colors hover:text-foreground"
-          >
-            Browse Events
-          </Link>
-        </nav>
-        <UserButton />
-      </header>
+    <div className="grid h-screen w-full overflow-hidden md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      {/* Sidebar (this will not scroll) */}
+      <Sidebar links={studentLinks} roleName="Student" />
 
-      <main className="p-4 md:p-8">{children}</main>
+      {/* Main content area */}
+      <div className="flex flex-col">
+        {/* Add 'overflow-auto' to make this area scrollable */}
+        <main className="flex-1 overflow-auto p-4 md:p-8">{children}</main>
+      </div>
     </div>
   );
 }

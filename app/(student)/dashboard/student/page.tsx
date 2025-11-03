@@ -1,7 +1,3 @@
-/*
-File: src/app/(student)/dashboard/page.tsx
-*/
-
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/user";
 import { notFound } from "next/navigation";
@@ -9,11 +5,10 @@ import { format } from "date-fns";
 import QRCode from "react-qr-code";
 import Link from "next/link";
 
-// 1. This function fetches the logged-in student's registrations
-async function getMyRegistrations() {
+// 1. This function now gets the user AND their registrations
+async function getStudentData() {
   const user = await getCurrentUser();
-  if (!user) {
-    // This shouldn't happen because of the layout, but it's good practice
+  if (!user || user.role !== "STUDENT") {
     notFound();
   }
 
@@ -23,7 +18,6 @@ async function getMyRegistrations() {
     },
     include: {
       event: {
-        // Get the event details for each registration
         include: {
           club: true,
         },
@@ -35,18 +29,24 @@ async function getMyRegistrations() {
       },
     },
   });
-  return registrations;
+
+  // 2. Return both the user and their registrations
+  return { registrations, user };
 }
 
-// 2. This is the main page component
+// 3. This is the main page component
 export default async function StudentDashboard() {
-  const registrations = await getMyRegistrations();
+  // 4. Get both pieces of data
+  const { registrations, user } = await getStudentData();
 
   return (
-    <div className="max-w-4xl">
-      <h1 className="mb-6 text-3xl font-bold tracking-tight">
-        My Registrations
+    <div>
+      {/* 5. Updated welcome message */}
+      <h1 className="mb-8 text-3xl font-bold tracking-tight">
+        Welcome, {user.firstName || "Student"}!
       </h1>
+
+      <h2 className="mb-6 text-2xl font-semibold">My Registrations</h2>
 
       {registrations.length === 0 ? (
         <p className="text-muted-foreground">
@@ -57,7 +57,7 @@ export default async function StudentDashboard() {
         </p>
       ) : (
         <div className="space-y-6">
-          {/* 3. Loop over the registrations and show them */}
+          {/* 6. Loop over the registrations (this code is the same) */}
           {registrations.map((reg) => (
             <div
               key={reg.id}
@@ -68,7 +68,7 @@ export default async function StudentDashboard() {
                 <h2 className="mb-2 text-2xl font-semibold">
                   {reg.event.title}
                 </h2>
-                <p className="mb-1 text-sm font-medium text-blue-400">
+                <p className="mb-1 text-sm font-medium text-primary">
                   {reg.event.club.name}
                 </p>
                 <p className="mb-4 text-sm text-muted-foreground">

@@ -6,22 +6,25 @@ File: src/app/components/Navbar.tsx
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import { FaCalendarDay } from "react-icons/fa";
 
 export default function Navbar() {
   return (
-    <header className="fixed left-0 top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
+    <header className="fixed left-0 top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
       {/* 1. We remove 'justify-between' from this div */}
-      <div className="container mx-auto flex h-16 max-w-5xl items-center px-4">
+      <div className="container mx-auto flex h-16 max-w-1xl items-center px-4">
         {/* 2. Logo - We add 'mr-auto' to push all other items to the right */}
         <Link
           href="/"
-          className="mr-auto text-2xl font-bold tracking-tight text-foreground"
+          className="mr-auto flex items-center gap-2 text-3xl font-bold tracking-tight text-foreground"
         >
-          Utsav
+          <span className="font-display">
+            <span className="text-primary">U</span>tsav
+          </span>
         </Link>
 
         {/* 3. Middle Links */}
-        <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+        <nav className="hidden items-center gap-6 text-base font-medium md:flex">
           <Link
             href="/#features"
             className="text-muted-foreground transition-colors hover:text-foreground"
