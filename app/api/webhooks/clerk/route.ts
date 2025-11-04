@@ -1,10 +1,10 @@
 /*
 File: src/app/api/webhooks/clerk/route.ts
-(This is the complete, correct file)
+(This is the final, type-safe version)
 */
 
 import { Webhook } from "svix";
-import { headers } from "next/headers"; // Import from 'next/headers'
+import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
@@ -18,16 +18,11 @@ export async function POST(req: Request) {
     );
   }
 
-  // --- THIS IS THE CORRECTED SECTION ---
-  // 1. We must 'await' the headers() function to get the headers object.
+  // 1. We must 'await' the headers() function
   const headerPayload = await headers();
-
-  // 2. The .get() method on the headers object is NOT async.
-  //    We do NOT use 'await' here.
   const svix_id = headerPayload.get("svix-id");
   const svix_timestamp = headerPayload.get("svix-timestamp");
   const svix_signature = headerPayload.get("svix-signature");
-  // ------------------------------------
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
     return new Response("Error: Missing svix headers", {
@@ -54,24 +49,47 @@ export async function POST(req: Request) {
   }
 
   // --- HANDLE THE EVENT ---
-  const { id, emailAddresses, firstName, lastName, imageUrl } = evt.data;
   const eventType = evt.type;
 
   if (eventType === "user.created") {
     console.log("✅ Webhook received: user.created");
 
-    // We cast evt.data to 'any' to bypass the incorrect TypeScript errors
-    const data = evt.data as any;
+    // We destructure INSIDE the 'if' block.
+    // TypeScript now knows 'evt.data' is of type 'UserJSON'.
+    // --- THIS IS THE FIX: Using snake_case ---
+    const {
+      id,
+      email_addresses,
+      first_name,
+      last_name,
+      image_url,
+      primary_email_address_id,
+    } = evt.data;
+
+    if (!id) {
+      return new Response("Error: Missing Clerk ID", { status: 400 });
+    }
+
+    // Find the primary email
+    // --- THIS IS THE FIX: Using snake_case ---
+    const email = email_addresses.find(
+      (e) => e.id === primary_email_address_id
+    )?.email_address;
+
+    if (!email) {
+      return new Response("Error: Missing primary email", { status: 400 });
+    }
 
     try {
-      // Now we use the snake_case properties that Clerk sends in its payload
+      // We now use the correct, type-safe variables
+      // --- THIS IS THE FIX: Using snake_case ---
       await db.user.create({
         data: {
-          clerkId: data.id,
-          email: data.email_addresses[0].email_address,
-          firstName: data.first_name,
-          lastName: data.last_name,
-          imageUrl: data.image_url,
+          clerkId: id,
+          email: email,
+          firstName: first_name,
+          lastName: last_name,
+          imageUrl: image_url,
           role: "STUDENT",
         },
       });
@@ -85,6 +103,19 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+  }
+
+  // Handle other event types (e.g., user.updated, user.deleted) if needed
+  // For example, you might want to update or delete your user record.
+
+  if (eventType === "user.updated") {
+    console.log("✅ Webhook received: user.updated");
+    // You could add logic here to update the user's name/image in your DB
+  }
+
+  if (eventType === "user.deleted") {
+    console.log("✅ Webhook received: user.deleted");
+    // You could add logic here to delete the user from your DB
   }
 
   return NextResponse.json({ message: "Webhook received" }, { status: 200 });
