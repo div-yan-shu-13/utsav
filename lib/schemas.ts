@@ -8,11 +8,12 @@ export const eventFormSchema = z.object({
   description: z.string().min(20, {
     message: "Description must be at least 20 characters.",
   }),
-  date: z.date({
-    // --- THIS IS THE FIX ---
+  // --- THIS IS THE FIX ---
+  // We use z.coerce.date() which is designed for this
+  date: z.coerce.date({
     invalid_type_error: "An event date is required.",
-    // -----------------------
   }),
+  // -----------------------
   venue: z.string().min(3, {
     message: "Venue must be at least 3 characters.",
   }),
