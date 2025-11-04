@@ -1,7 +1,3 @@
-/*
-File: src/lib/schemas.ts
-*/
-
 import { z } from "zod";
 
 // This is the Zod schema for your event form
@@ -13,7 +9,9 @@ export const eventFormSchema = z.object({
     message: "Description must be at least 20 characters.",
   }),
   date: z.date({
-    required_error: "An event date is required.",
+    // --- THIS IS THE FIX ---
+    invalid_type_error: "An event date is required.",
+    // -----------------------
   }),
   venue: z.string().min(3, {
     message: "Venue must be at least 3 characters.",
@@ -35,7 +33,7 @@ export const eventFormSchema = z.object({
     .url({
       message: "Please provide a valid URL for the creative/poster.",
     })
-    .optional(), // We'll make this a file upload later
+    .optional(),
 });
 
 // We also export the TypeScript 'type' of this schema
