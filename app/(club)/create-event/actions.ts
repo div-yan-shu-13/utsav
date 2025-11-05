@@ -24,8 +24,9 @@ const groq = new Groq({
 function buildNotesheetPrompt(data: EventFormValues): string {
   // Simple string template. You can make this as complex as you want.
   // This is where you'd match your "sample notesheet"
+  const eventDate = data.date ? format(data.date, "PPP") : "Not specified";
   return `
-    Please generate an official notesheet for a university event.
+    Please generate an official notesheet for a university event for Manipal University Jaipur.
     Use the following details and format it clearly with headings.
 
     IMPORTANT: Do NOT use Markdown tables, horizontal rules (---), or any placeholder signature lines (like '||---||' or '____').
@@ -34,7 +35,7 @@ function buildNotesheetPrompt(data: EventFormValues): string {
     EVENT DETAILS:
     - Event Title: ${data.title}
     - Description: ${data.description}
-    - Date: ${format(data.date, "PPP")}
+    - Date: ${eventDate}
     - Venue: ${data.venue}
     - Objectives: ${data.objectives}
     - Beneficiaries: ${data.beneficiaries}
@@ -67,7 +68,7 @@ export async function createEvent(values: EventFormValues) {
   // 3. (Optional but good) Re-validate data on the server
   const validatedFields = eventFormSchema.safeParse(values);
   if (!validatedFields.success) {
-    throw new Error("Invalid form data.");
+    throw new Error(validatedFields.error.issues[0].message);
   }
 
   // Get the validated data
@@ -87,8 +88,12 @@ export async function createEvent(values: EventFormValues) {
 
     // 5. --- SAVE EVERYTHING TO DATABASE ---
     // We use a $transaction to ensure all or nothing is created.
+
     await db.$transaction(async (prisma) => {
       // a. Create the Event
+      if (!data.date) {
+        throw new Error("Event date is missing.");
+      }
       const newEvent = await prisma.event.create({
         data: {
           title: data.title,
