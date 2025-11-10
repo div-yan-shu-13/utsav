@@ -27,7 +27,7 @@ function buildNotesheetPrompt(data: EventFormValues): string {
   const eventDate = data.date ? format(data.date, "PPP") : "Not specified";
   return `
     Please generate an official notesheet for a university event for Manipal University Jaipur.
-    Use the following details and format it clearly with headings.
+    Use the following details and format it clearly with headings. Feel free to expand on the objectives and other sections to make it comprehensive. Also feel free to exaggerate details to make it look more official. Do not finish with "Notesheet prepared by..." or "Notesheet approved by...". Always finish with a declaration statement that the club will take care of all rules and regulations durin the conduct of the event. Also, digital notesheets do not require signatures.
 
     IMPORTANT: Do NOT use Markdown tables, horizontal rules (---), or any placeholder signature lines (like '||---||' or '____').
     Just use clean, readable text.
