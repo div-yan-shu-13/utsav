@@ -70,7 +70,7 @@ export async function rejectEvent(eventId: string, comments: string) {
   }
 
   // 3. Find the approval record
-  const approval = await db.eventApproval.findFirst({
+  const approval = await db.eventApproval.findUnique({
     where: { eventId },
   });
 
